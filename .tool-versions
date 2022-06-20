@@ -1,0 +1,4 @@
+# Установить всё одной командой:
+# ASDF_RUBY_BUILD_VERSION=master asdf install
+nodejs 16.0.0
+
