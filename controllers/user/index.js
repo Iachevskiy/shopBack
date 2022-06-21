@@ -8,7 +8,29 @@ const User = db.define('user',{
     role: { type: DataTypes.STRING, defaultValue: 'USER'}
 })
 
+const UserGetAll = () => User.findAll()
+const UserGetOne = ({id}) => User.findByPk(id)
+const UserCreate = ({data}) => User.create(data)
+const UserDelete = ({id}) => User.destroy({
+    where: {
+        id
+    }
+})
+const UserUpdate = ({id, data}) => User.update(data,
+    {
+        where: {
+            id
+        }
+    }
+)
+
 module.exports = {
-    methods: {},
+    methods: {
+        UserGetAll,
+        UserGetOne,
+        UserCreate,
+        UserDelete,
+        UserUpdate
+    },
     User,
 }

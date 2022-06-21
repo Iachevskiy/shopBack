@@ -4,7 +4,9 @@ const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 
 const { connect } = require('./db/db')
-const controllers = require('./controllers')
+// const controllers = require('./controllers')
+
+const models = require('./db/models')
 
 module.exports = async function (fastify, opts) {
   // Place here your custom code!

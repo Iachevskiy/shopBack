@@ -9,6 +9,7 @@ const { TypeBrand, methods: TypeBrandMethods  } = require('./typeBrand')
 const { Rating, methods: RatingMethods  } = require('./rating')
 
 
+
 User.hasOne(Basket)
 Basket.belongsTo(User)
 
@@ -35,6 +36,8 @@ DeviceInfo.belongsTo(Device)
 
 Type.belongsToMany(Brand, {through: TypeBrand})
 Brand.belongsToMany(Type, {through: TypeBrand})
+
+
 
 module.exports = {
     ...UserMethods,
