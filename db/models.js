@@ -9,9 +9,68 @@ const user = sequelize.define('user',{
     role: { type: DataTypes.STRING, defaultValue: 'USER'}
 })
 
+const userSchema = {
+    body: {
+        type: 'object',
+        required: ['emeil', 'password'],
+        properties: {
+            emeil: { type: 'string' },
+            password: { type: 'string' },
+            role: { type: 'string' },
+        }
+    }
+}
+
+const userData = {
+    model: user,
+    schema: {
+        body: {
+            type: 'object',
+            required: ['emeil', 'password'],
+            properties: {
+                emeil: { type: 'string' },
+                password: { type: 'string' },
+                role: { type: 'string' },
+            }
+        }},
+    route: 'user',
+    routes: {
+        GET: {
+            on: true,
+            auth: ['admin']
+        },
+        GETAll: {
+            on: true,
+            auth: ['admin']
+        },
+        POST: {
+            on: true,
+            auth: ['admin']
+        },
+        PUT: {
+            on: true,
+            auth: ['admin']
+        },
+        DELETE: {
+            on: true,
+            auth: ['admin']
+        },
+    }
+}
+
 const basket = sequelize.define('basket', {
     id: { type: DataTypes.INTEGER, primaryKey:true, autoIncrement: true},
 })
+
+const basketSchema = {
+    body: {
+        type: 'object',
+        required: ['userId'],
+        properties: {
+            userId: { type: 'number' },
+        }
+    }
+}
 
 const basket_device = sequelize.define('basket_device', {
     id: { type: DataTypes.INTEGER, primaryKey:true, autoIncrement: true},
@@ -78,7 +137,7 @@ type.belongsToMany(brand, {through: type_brand})
 brand.belongsToMany(type, {through: type_brand})
 
 module.exports = {
-    db: sequelize,
+    // db: sequelize,
     models: {
          user,
          basket,
@@ -89,5 +148,9 @@ module.exports = {
          rating,
          type_brand,
          device_info
+    },
+    schemas: {
+        user: userSchema,
+        basket: basketSchema
     }
 }

@@ -2,85 +2,57 @@
 
 const fp = require('fastify-plugin')
 
-// the use of fastify-plugin is required to be able
-// to export the decorators to the outer scope
-const {db} = require('../db/db')
-const controllers = require("../controllers");
-const models = Object.keys(db.models);
-
-const modelsData = require('../db/models')
+const models2 = require('../db/models2')
 
 
 
+const request = (model, method) => async function ({params, body, ...obj}, res) {
 
+  const id = params.id
 
-const reqFunc2 = (model, method) => async function (req, res) {
-  let data;
-  switch (method) {
-    case 'getAll':
-      data = await modelsData.models[model].findAll()
-      return data
-    case 'getOne':
-      data = await modelsData.models[model].findByPk(req.params.id)
-      return data
-    case 'delete':
-      data = await modelsData.models[model].destroy({ where: {id: req.params.id} })
-      return data
-    case 'create':
-      data = await modelsData.models[model].create(req.body)
-      return data
-    case 'update':
-      data = await modelsData.models[model].update(req.body, { where: {id: req.params.id} })
-      return data
+  try {
+
+    if(method === 'GETAll') return await model.findAll()
+    if(method === 'GET') return await model.findByPk(id)
+    if(method === 'DELETE') return await model.destroy({ where: {id} })
+    if(method === 'POST') return await model.create(body)
+    if(method === 'PUT'){
+      const data = await model.update(body, { where: {id} })
+      if(data[0]){
+        return { message: 'Обновление прошло успешно'}
+      } else {
+        throw new Error('Не найдено')
+      }
+    }
+
+  } catch (e) {
+    res.statusCode = 400
+    let message = "Описание ошибки"
+    if (e.message) message = e.message
+    if (e.errors && e.errors[0] && e.errors[0].message) message = e.errors[0].message
+    return { message }
   }
-
-  // try {
-  //   return await controllers[model]({id: req.params.id, data: req.body });
-  // } catch (e) {
-  //   res.statusCode = 401
-  //   return { error: e.errors[0].message}
-  // }
 }
 
 
 
 module.exports = fp(async function (fastify, opts) {
 
-  models.forEach((model)=>{
 
-    // getAll
-    fastify.route({
-      method: 'GET',
-      url: `/${model}`,
-      handler: reqFunc2( model, 'getAll')
-    })
+  const makeUrl = (method, model) =>  [ 'GET', 'DELETE', 'PUT'].includes(method) ? `/${model}/:id` : `/${model}`
 
-    // getOne
-    fastify.route({
-      method: 'GET',
-      url: `/${model}/:id`,
-      handler: reqFunc2( model, 'getOne')
-    })
+  Object.keys(models2).forEach((key)=>{
+    const { model, schema, url, routes } = models2[key];
 
-    // Delete
-    fastify.route({
-      method: 'DELETE',
-      url: `/${model}/:id`,
-      handler: reqFunc2( model, 'delete')
-    })
+    Object.keys(routes).forEach((method)=>{
+      const options = {
+        method: method === 'GETAll' ? 'GET' : method,
+        url: makeUrl(method, url),
+        handler: request( model, method),
+      }
+      if([ 'POST', 'PUT'].includes(method)) options.schema = { ...options.schema, ...schema }
 
-    // Create
-    fastify.route({
-      method: 'POST',
-      url: `/${model}`,
-      handler: reqFunc2( model, 'create')
-    })
-
-    // Update
-    fastify.route({
-      method: 'PUT',
-      url: `/${model}/:id`,
-      handler: reqFunc2( model, 'update')
+      fastify.route(options)
     })
 
   })
