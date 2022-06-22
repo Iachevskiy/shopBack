@@ -45,14 +45,18 @@ module.exports = fp(async function (fastify, opts) {
     const { model, schema, url, routes } = models2[key];
 
     Object.keys(routes).forEach((method)=>{
-      const options = {
-        method: method === 'GETAll' ? 'GET' : method,
-        url: makeUrl(method, url),
-        handler: request( model, method),
-      }
-      if([ 'POST', 'PUT'].includes(method)) options.schema = { ...options.schema, ...schema }
+      if(routes[method].on){
 
-      fastify.route(options)
+        const options = {
+          method: method === 'GETAll' ? 'GET' : method,
+          url: makeUrl(method, url),
+          handler: request( model, method),
+        }
+        if([ 'POST', 'PUT'].includes(method)) options.schema = { ...options.schema, ...schema }
+
+        fastify.route(options)
+      }
+
     })
 
   })
